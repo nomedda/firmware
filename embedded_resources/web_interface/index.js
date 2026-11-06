@@ -1719,5 +1719,162 @@ window.addEventListener("popstate", (event) => {
         updateURL(currentDrive, currentPath, null);
       }
     }, 100); // Small delay to ensure the file list is loaded first
+   
+/* =========================================================
+   Watch Dogs UX layer + touch navigation
+   Добавлено в конец index.js
+   ========================================================= */
+(function () {
+  "use strict";
+  if (window.__wdLayer) return;
+  window.__wdLayer = true;
+
+  document.body.classList.add("wd");
+
+  /* ---------------- тосты ---------------- */
+  const host = document.createElement("div");
+  host.className = "wd-toasts";
+  document.body.appendChild(host);
+
+  function toast(msg, type = "info", ms = 3200) {
+    const el = document.createElement("div");
+    el.className = "wd-toast wd-toast--" + type;
+    el.textContent = String(msg);
+    host.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("in"));
+    setTimeout(() => {
+      el.classList.remove("in");
+      setTimeout(() => el.remove(), 220);
+    }, ms);
+    return el;
+  }
+  window.wdToast = toast;
+
+  const nativeAlert = window.alert.bind(window);
+  window.alert = (m) => toast(m, "warn", 5200);
+  window.wdAlert = nativeAlert;
+
+  /* ---------------- часы в шапке ---------------- */
+  const right = document.querySelector(".right-part");
+  if (right && !document.querySelector(".wd-clock")) {
+    const c = document.createElement("span");
+    c.className = "wd-clock";
+    right.insertBefore(c, right.firstChild);
+    const tick = () =>
+      (c.textContent = new Date().toLocaleTimeString([], { hour12: false }));
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  /* ---------------- сенсорное управление экраном ----------------
+     Свайп влево/вправо/вверх/вниз  -> Prev / Next / Up / Down
+     Тап                            -> Sel
+     Лонг-тап (550 мс)              -> Sel 500 (меню)
+     Двухпальцевый свайп вверх/вниз -> NextPage / PrevPage
+     ------------------------------------------------------------- */
+  const canvas = document.getElementById("navigator-screen");
+  if (!canvas || typeof runNavigation !== "function") return;
+
+  const SWIPE_MIN   = 24;
+  const MOVE_CANCEL = 12;
+  const LONG_PRESS  = 550;
+
+  const points = new Map();
+  let longTimer = null;
+  let handled = false;
+  let startedAt = 0;
+
+  const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (_) {} };
+  const nav = (dir) => { buzz(12); runNavigation(dir); };
+  const clearLong = () => {
+    if (longTimer) { clearTimeout(longTimer); longTimer = null; }
+  };
+
+  canvas.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+
+    points.set(e.pointerId, {
+      x: e.clientX, y: e.clientY,
+      sx: e.clientX, sy: e.clientY,
+    });
+
+    if (points.size === 1) {
+      handled = false;
+      startedAt = Date.now();
+      clearLong();
+      longTimer = setTimeout(() => {
+        if (handled || points.size !== 1) return;
+        handled = true;
+        nav("Sel 500");
+      }, LONG_PRESS);
+    } else {
+      clearLong();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener("pointermove", (e) => {
+    const p = points.get(e.pointerId);
+    if (!p) return;
+    p.x = e.clientX;
+    p.y = e.clientY;
+    if (!handled && Math.hypot(p.x - p.sx, p.y - p.sy) > MOVE_CANCEL) clearLong();
+  }, { passive: true });
+
+  const finish = (e) => {
+    const p = points.get(e.pointerId);
+    if (!p) return;
+    points.delete(e.pointerId);
+    clearLong();
+
+    if (handled) {
+      if (points.size === 0) handled = false;
+      return;
+    }
+
+    const dx = p.x - p.sx;
+    const dy = p.y - p.sy;
+    const adx = Math.abs(dx);
+    const ady = Math.abs(dy);
+
+    if (points.size > 0) {
+      if (ady > 60 && ady > adx) {
+        handled = true;
+        nav(dy < 0 ? "NextPage" : "PrevPage");
+      }
+      return;
+    }
+
+    if (adx < SWIPE_MIN && ady < SWIPE_MIN) {
+      if (Date.now() - startedAt < LONG_PRESS) {
+        handled = true;
+        nav("Sel");
+      }
+      return;
+    }
+
+    handled = true;
+    if (adx > ady) nav(dx > 0 ? "Next" : "Prev");
+    else            nav(dy > 0 ? "Down" : "Up");
+  };
+
+  canvas.addEventListener("pointerup", finish);
+  canvas.addEventListener("pointercancel", finish);
+  canvas.addEventListener("pointerleave", (e) => {
+    if (points.has(e.pointerId) && !handled) finish(e);
+  });
+
+  const HINT_KEY = "wd-touch-hint-shown";
+  const origOpen = window.openNavigator;
+  if (typeof origOpen === "function") {
+    window.openNavigator = function () {
+      origOpen.apply(this, arguments);
+      if (localStorage.getItem(HINT_KEY)) return;
+      localStorage.setItem(HINT_KEY, "1");
+      toast("Экран: свайп — навигация, тап — OK, удержание — меню", "ok", 6000);
+    };
+  }
+})(); 
   }
 })();
