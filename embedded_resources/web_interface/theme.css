@@ -1,0 +1,407 @@
+/* =========================================================
+   Bruce WebUI Ч Watch Dogs / DedSec theme
+   «амен€ет theme.css. √рузитс€ после index.css.
+   ========================================================= */
+
+:root {
+  /* базовые переменные, которые использует index.css */
+  --color: #a9f7ff;
+  --background: #05080c;
+  --light-color: rgba(0, 240, 255, .10);
+
+  /* акценты */
+  --accent: #00f0ff;
+  --sec-color: #ff2a6d;
+  --ok-color: #7cff00;
+  --warn-color: #ffd166;
+  --danger-color: #ff2a6d;
+
+  /* линии / панели */
+  --line: rgba(0, 240, 255, .28);
+  --line-strong: rgba(0, 240, 255, .60);
+  --panel: #08121a;
+  --muted: #6f9aa6;
+  --glow: 0 0 14px rgba(0, 240, 255, .35);
+  --glow-strong: 0 0 22px rgba(0, 240, 255, .55);
+
+  /* шрифты (только системные Ч устройство offline) */
+  --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono",
+               "DejaVu Sans Mono", Consolas, monospace;
+  --font-display: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ---------- фон: сетка + CRT-сканлайны ---------- */
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(0, 240, 255, .10), transparent 60%),
+    var(--background);
+  color: var(--color);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(rgba(0, 240, 255, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, .05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(circle at 50% 25%, #000 0%, transparent 78%);
+          mask-image: radial-gradient(circle at 50% 25%, #000 0%, transparent 78%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    rgba(0, 0, 0, .22) 2px 3px
+  );
+  opacity: .22;
+  mix-blend-mode: multiply;
+}
+
+/* ---------- контейнер ---------- */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(0, 240, 255, .05), transparent 140px),
+    rgba(5, 8, 12, .84);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px,
+                     100% 100%, 14px 100%, 0 calc(100% - 14px));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .65),
+              inset 0 0 40px rgba(0, 240, 255, .03);
+}
+
+/* ---------- шапка ---------- */
+.container .header {
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(0, 240, 255, .12), transparent 65%);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.container .header .title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: var(--glow);
+}
+
+.wd-clock {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--muted);
+  padding: 0 10px;
+  margin-right: 6px;
+  border-right: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+/* ---------- кнопки ---------- */
+.btn-action {
+  border: 1px solid var(--line);
+  background: rgba(0, 240, 255, .05);
+  color: var(--color);
+  font-family: var(--font-mono);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  transition: background .15s, border-color .15s, box-shadow .15s, color .15s;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px,
+                     100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.btn-action:hover:not(:disabled),
+.btn-action.active {
+  background: var(--accent);
+  color: #00181c;
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.btn-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-action.btn-default {
+  border: 1px solid var(--accent);
+  box-shadow: var(--glow);
+}
+
+.icon-action:hover {
+  background: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.icon-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---------- индикаторы дисков ---------- */
+.container .free-space {
+  border-bottom: 1px solid var(--line);
+}
+
+.container .free-space .block-space {
+  border-right: 1px solid var(--line);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: background .15s, color .15s;
+}
+
+.container .free-space .block-space.btn-action:hover:not(:disabled) {
+  background: rgba(0, 240, 255, .10);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+/* ---------- панель действий / путь ---------- */
+.container .action-content {
+  border-bottom: 1px solid var(--line);
+  background: rgba(0, 240, 255, .02);
+}
+
+.current-path {
+  color: var(--accent);
+  letter-spacing: .06em;
+}
+
+/* ---------- таблица файлов ---------- */
+.container .content .table thead tr th {
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.container .content .table tbody tr {
+  border-bottom: 1px solid rgba(0, 240, 255, .06);
+}
+
+.container .content .table tbody tr:hover {
+  background: rgba(0, 240, 255, .07);
+}
+
+.container .content .table tbody tr:hover .col-name {
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(0, 240, 255, .6);
+}
+
+.container .content .table .col-size {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- диалоги ---------- */
+.dialog-background {
+  background: rgba(2, 4, 6, .78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.dialog {
+  border: 1px solid var(--line-strong);
+  background:
+    linear-gradient(180deg, rgba(0, 240, 255, .07), transparent 90px),
+    var(--panel);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px,
+                     100% 100%, 12px 100%, 0 calc(100% - 12px));
+  box-shadow: 0 0 0 1px rgba(0, 240, 255, .06),
+              0 24px 70px rgba(0, 0, 0, .75);
+}
+
+.dialog .dialog-head {
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(0, 240, 255, .14), transparent);
+  font-family: var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dialog .dialog-footer {
+  border-top: 1px solid var(--line);
+  background: rgba(0, 240, 255, .03);
+}
+
+.dialog .dialog-body input {
+  border: 1px solid var(--line);
+  background: #04090d;
+  color: var(--color);
+  padding: 6px 8px;
+}
+
+.dialog .dialog-body input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+/* ---------- навигатор: экран + площадка ---------- */
+.dialog.navigator {
+  max-width: min(560px, 96vw);
+}
+
+#navigator-screen {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  max-width: 100%;
+  height: auto;
+  background: #000;
+  border: 1px solid var(--line-strong);
+  box-shadow: inset 0 0 26px rgba(0, 240, 255, .16),
+              0 0 14px rgba(0, 240, 255, .22);
+  touch-action: none;
+  cursor: crosshair;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dialog.navigator .navigator-canvas {
+  border: 1px solid var(--line);
+  background: rgba(0, 240, 255, .03);
+}
+
+.dialog.navigator .navigator-canvas .nav {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  background: rgba(5, 8, 12, .9);
+  transition: background .12s, box-shadow .12s;
+}
+
+.dialog.navigator .navigator-canvas .nav:hover,
+.dialog.navigator .navigator-canvas .nav:active {
+  background: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.dialog.navigator .navigator-warning {
+  background: rgba(255, 209, 102, .10);
+  border: 1px solid var(--warn-color);
+  color: var(--warn-color);
+  letter-spacing: .04em;
+}
+
+/* ---------- редактор ---------- */
+.dialog.editor .line-numbers {
+  background: rgba(0, 240, 255, .04);
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.dialog.editor .file-content {
+  background: #04090d;
+  color: var(--color);
+}
+
+/* ---------- загрузка / drag&drop ---------- */
+.loading-area,
+.upload-area {
+  background: rgba(2, 4, 6, .72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.loading-area .text,
+.upload-area::before {
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--accent);
+  box-shadow: var(--glow);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.dialog.upload .upload-loading {
+  border: 1px solid var(--line);
+  background: #04090d;
+}
+
+.dialog.upload .upload-loading .bar {
+  background: rgba(0, 240, 255, .22);
+}
+
+/* ---------- тосты (создаютс€ из JS) ---------- */
+.wd-toasts {
+  position: fixed;
+  z-index: 10000;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(360px, 90vw);
+  pointer-events: none;
+}
+
+.wd-toast {
+  pointer-events: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 10px 12px;
+  color: #d7f7ff;
+  background: rgba(8, 18, 26, .97);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px,
+                     100% 100%, 10px 100%, 0 calc(100% - 10px));
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .18s, transform .18s;
+}
+
+.wd-toast.in { opacity: 1; transform: none; }
+.wd-toast--ok    { border-left-color: var(--ok-color); }
+.wd-toast--warn  { border-left-color: var(--warn-color); }
+.wd-toast--error { border-left-color: var(--danger-color); }
+
+::selection {
+  background: var(--accent);
+  color: #00181c;
+}
+
+/* ---------- мобильные ---------- */
+@media (max-width: 600px) {
+  body { padding: 6px; }
+  .container { clip-path: none; }
+  .container .header .title { font-size: 12px; letter-spacing: .14em; }
+  .dialog.navigator .navigator-canvas .nav { width: 44px; height: 44px; }
+  .wd-toasts { left: 10px; right: 10px; bottom: 10px; max-width: none; }
+  .wd-clock { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+}
